@@ -1,0 +1,92 @@
+/* 全局样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", 
+    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  color: #333;
+  line-height: 1.5;
+  background-color: #f5f7fa;
+}
+
+/* 布局容器 */
+.container {
+  padding: 15px;
+  width: 100%;
+}
+
+/* 卡片样式 */
+.card {
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  padding: 20px;
+}
+
+.card-header {
+  border-bottom: 1px solid #ebeef5;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 表格样式 */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.table th {
+  font-weight: bold;
+  color: #606266;
+}
+
+/* 按钮样式 */
+.btn {
+  display: inline-block;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  color: #606266;
+  text-align: center;
+  box-sizing: border-box;
+  outline: none;
+  margin: 0;
+  transition: .1s;
+  font-weight: 500;
+  padding: 12px 20px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #409eff;
+  border-color: #409eff;
+}
+
+.btn-success {
+  color: #fff;
+  background-color: #67c23a;
+  border-color: #67c23a;
+}
+
+.btn-danger {
+  color: #fff;
+  background-color: #f56c6c;
+  border-color: #f56c6c;
+} 

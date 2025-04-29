@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小区物业后台管理系统 - 工单管理</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Might not be needed, keep for now -->
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>LOGO</h1>
+            <p>小区物业后台管理</p>
+        </div>
+        <div class="menu">
+             <a href="dashboard.html" class="menu-item">
+                 <i>📄</i> 首页
+             </a>
+             <a href="monitoring.html" class="menu-item">
+                 <i>🚪</i> 门禁监控
+             </a>
+             <a href="owner-management.html" class="menu-item">
+                 <i>🏢</i> 业主管理
+             </a>
+             <a href="work-order.html" class="menu-item"> 
+                 <i>📝</i> 工单管理
+             </a>
+             <a href="visitor-management.html" class="menu-item">
+                 <i>👥</i> 访客管理
+             </a>
+             <a href="appointment-management.html" class="menu-item">
+                 <i>📅</i> 预约管理
+             </a>
+             <a href="parking-management.html" class="menu-item">
+                 <i>🅿️</i> 车位管理
+             </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Content from original #work-order-view starts here -->
+         <div class="module" style="position: relative;">
+             <div class="table-loading-overlay" id="work-order-table-loading">
+                 加载中...
+                </div>
+             <div class="filter-bar">
+                 <select name="workOrderType" id="workOrderType">
+                     <option value="">工单类型</option>
+                     <option value="repair">报修</option>
+                     <option value="payment">缴费</option>
+                 </select>
+                 <select name="workOrderStatus" id="workOrderStatus">
+                     <option value="">工单状态</option>
+                     <option value="pending">待处理</option>
+                     <option value="processing">处理中</option>
+                     <option value="completed">已完成</option>
+                     <option value="paid">已缴费</option> 
+                     <option value="unpaid">待缴费</option> 
+                 </select>
+                 <select name="priority" id="priority-select">
+                     <option value="">紧急程度</option>
+                     <option value="high">高</option>
+                     <option value="medium">中</option>
+                     <option value="low">低</option>
+                 </select>
+                 <select name="repairArea" id="repair-area-select">
+                     <option value="">维修区域</option>
+                     <!-- TODO: Populate with actual areas -->
+                 </select>
+                 <select name="feeType" id="fee-type-select" style="display: none;">
+                     <option value="">缴费类型</option>
+                     <option value="water">水电费</option>
+                     <option value="property">物业费</option>
+                 </select>
+                 <input type="date" name="workOrderDate">
+                 <input type="text" name="workOrderSearch" placeholder="模糊查询 (单号/描述)">
+                 <button class="search-button">查询</button>
+                 <button class="reset-button" style="margin-left: 5px;">清空</button> 
+            </div>
+
+             <div class="action-buttons">
+                 <button class="primary-action">导出数据</button>
+                 <button class="secondary-action" id="refresh-work-order-table" style="margin-left: auto;">
+                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path></svg>
+                     刷新表格
+                 </button>
+             </div>
+
+             <!-- 维修工单表格 -->
+             <table class="work-order-table repair-table">
+                 <thead>
+                     <tr>
+                         <th><input type="checkbox"></th>
+                         <th>状态</th>
+                         <th>紧急程度</th>
+                         <th>单号</th>
+                         <th>维修区域</th>
+                         <th>故障描述</th>
+                         <th>上门时间</th>
+                         <th>联系方式</th>
+                         <th>创建时间</th>
+                     </tr>
+                 </thead>
+                 <tbody>
+                     <!-- Work order rows will be populated here -->
+                     <tr><td colspan="9" style="text-align: center; padding: 20px;">加载中...</td></tr>
+                 </tbody>
+             </table>
+
+             <!-- 缴费工单表格 -->
+             <table class="work-order-table payment-table" style="display: none;">
+                 <thead>
+                     <tr>
+                         <th><input type="checkbox"></th>
+                         <th>状态</th>
+                         <th>类型</th>
+                         <th>单号</th>
+                         <th>费用明细</th>
+                         <th>计费周期</th>
+                         <th>应缴金额</th>
+                         <th>创建时间</th>
+                     </tr>
+                 </thead>
+                 <tbody>
+                     <!-- Payment order rows will be populated here -->
+                     <tr><td colspan="8" style="text-align: center; padding: 20px;">加载中...</td></tr>
+                 </tbody>
+             </table>
+
+             <div class="table-footer">
+                 <div class="footer-actions">
+                     <button class="primary-action" id="work-order-remind-button">提醒</button>
+                     <button class="delete-button" id="work-order-delete-button">删除</button>
+                 </div>
+                 <div class="pagination">
+                     <span>本页共X条/共XXX条</span>
+                     <a href="#">&lt;</a>
+                     <!-- Page numbers -->
+                     <span class="dots" style="display: none;">...</span>
+                     <a href="#">&gt;</a>
+                     <span>跳转至</span>
+                     <input type="number" min="1" value="1">
+                     <span>页</span>
+                     <button>跳转</button>
+                 </div>
+             </div>
+            </div>
+        <!-- Content from original #work-order-view ends here -->
+    </div>
+
+    <!-- Operation Success Modal (Copied for self-containment) -->
+    <div id="success-modal" class="modal-overlay">
+         <div class="modal" style="width: 350px;">
+             <div class="success-modal-content">
+                 <img src="images/操作成功.png" alt="操作成功">
+                 <p>操作成功</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Work Order Status Modal -->
+    <div id="change-work-order-status-modal" class="modal-overlay">
+        <div class="modal" style="width: 400px;">
+            <div class="modal-header">
+                <h3>修改工单状态</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>工单单号:</label>
+                    <span id="modal-wo-id" class="value">N/A</span>
+                </div>
+                <div class="form-group">
+                    <label>当前状态:</label>
+                    <span id="modal-wo-current-status" class="value">N/A</span>
+                </div>
+                 <div class="form-group">
+                    <label>修改为:</label>
+                    <div class="status-buttons" style="flex-wrap: wrap; gap: 10px;">
+                        <!-- Buttons will have data-new-status attribute -->
+                        <button data-new-status="待受理">设为 待受理</button> 
+                        <button data-new-status="处理中">设为 处理中</button> 
+                        <button data-new-status="已完成">设为 已完成</button> 
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-button" id="cancel-change-wo-status">取消</button>
+                <!-- Confirmation is done via status buttons directly -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script> 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const workOrderTypeSelect = document.getElementById('workOrderType');
+            const workOrderStatusSelect = document.getElementById('workOrderStatus');
+            const prioritySelect = document.getElementById('priority-select');
+            const repairAreaSelect = document.getElementById('repair-area-select');
+            const feeTypeSelect = document.getElementById('fee-type-select');
+            const repairTable = document.querySelector('.repair-table');
+            const paymentTable = document.querySelector('.payment-table');
+            
+            // 工单类型变更时切换表格和相关筛选项
+            workOrderTypeSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+                
+                if (selectedType === 'payment') {
+                    // 显示缴费工单表格和相关筛选条件
+                    repairTable.style.display = 'none';
+                    paymentTable.style.display = 'table';
+                    prioritySelect.style.display = 'none';
+                    repairAreaSelect.style.display = 'none';
+                    feeTypeSelect.style.display = 'inline-block';
+                    
+                    // 更新状态选项为缴费相关状态
+                    updateStatusOptions('payment');
+                } else {
+                    // 默认显示维修工单表格和相关筛选条件
+                    repairTable.style.display = 'table';
+                    paymentTable.style.display = 'none';
+                    prioritySelect.style.display = 'inline-block';
+                    repairAreaSelect.style.display = 'inline-block';
+                    feeTypeSelect.style.display = 'none';
+                    
+                    // 更新状态选项为维修相关状态
+                    updateStatusOptions('repair');
+                }
+            });
+            
+            // 更新状态选项
+            function updateStatusOptions(type) {
+                // 清空当前选项
+                workOrderStatusSelect.innerHTML = '<option value="">工单状态</option>';
+                
+                if (type === 'payment') {
+                    // 缴费相关状态
+                    const paymentStatuses = [
+                        { value: 'unpaid', text: '待缴费' },
+                        { value: 'paid', text: '已缴费' },
+                        { value: 'reminded', text: '已催缴' },
+                        { value: 'canceled', text: '已取消' }
+                    ];
+                    
+                    paymentStatuses.forEach(status => {
+                        const option = document.createElement('option');
+                        option.value = status.value;
+                        option.textContent = status.text;
+                        workOrderStatusSelect.appendChild(option);
+                    });
+                } else {
+                    // 维修相关状态
+                    const repairStatuses = [
+                        { value: 'pending', text: '待处理' },
+                        { value: 'processing', text: '处理中' },
+                        { value: 'completed', text: '已完成' }
+                    ];
+                    
+                    repairStatuses.forEach(status => {
+                        const option = document.createElement('option');
+                        option.value = status.value;
+                        option.textContent = status.text;
+                        workOrderStatusSelect.appendChild(option);
+                    });
+                }
+            }
+            
+            // 初始化缴费表格示例数据（用于演示）
+            function populatePaymentTableExample() {
+                const paymentTableBody = paymentTable.querySelector('tbody');
+                paymentTableBody.innerHTML = '';
+                
+                const sampleData = [
+                    { status: '待缴费', type: '水电费', id: 'XXXXXXXX', detail: 'XXXXXXXXXX', period: 'X月X日-X月X日', amount: 'XXX元', time: 'YYYY-MM-DD HH:MM' },
+                    { status: '已缴费', type: '物业费', id: 'XXXXXXXX', detail: 'XXXXXXXXXX', period: 'X月X日-X月X日', amount: 'XXX元', time: 'YYYY-MM-DD HH:MM' },
+                    { status: '已催缴', type: '水电费', id: 'XXXXXXXX', detail: 'XXXXXXXXXX', period: 'X月X日-X月X日', amount: 'XXX元', time: 'YYYY-MM-DD HH:MM' }
+                ];
+                
+                sampleData.forEach(item => {
+                    let statusClass = '';
+                    if (item.status === '待缴费') statusClass = 'status-pending';
+                    else if (item.status === '已缴费') statusClass = 'status-approved';
+                    else if (item.status === '已催缴') statusClass = 'status-processing';
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><input type="checkbox" class="payment-order-checkbox"></td>
+                        <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+                        <td>${item.type}</td>
+                        <td>${item.id}</td>
+                        <td>${item.detail}</td>
+                        <td>${item.period}</td>
+                        <td>${item.amount}</td>
+                        <td>${item.time}</td>
+                    `;
+                    paymentTableBody.appendChild(row);
+                });
+            }
+            
+            // 查询按钮点击事件
+            document.querySelector('.search-button').addEventListener('click', function() {
+                const selectedType = workOrderTypeSelect.value;
+                
+                if (selectedType === 'payment') {
+                    // 模拟缴费查询
+                    populatePaymentTableExample();
+                } else {
+                    // 维修查询通过script.js中的函数处理
+                    // 这里不需要额外代码，因为script.js中已有相关逻辑
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>门禁监控系统</title>
+  <link rel="stylesheet" href="./doorMonitor.css">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_2504896_gt3kmqjpbi.css">
+</head>
+<body>
+  <div id="app">
+    <div class="door-monitor-container">
+      <h1 class="door-monitor-title">门禁监控系统</h1>
+      
+      <!-- 门禁状态与控制区域 -->
+      <div class="door-control-section">
+        <div class="door-control-header">
+          <span>门禁状态与控制</span>
+          <span>最后更新: {{ formatTime(lastUpdateTime) }}</span>
+        </div>
+        
+        <div class="door-status" :class="doorStatus === 'open' ? 'door-status-open' : 'door-status-closed'">
+          <div class="door-status-indicator"></div>
+          <div class="door-status-text">
+            门禁状态: {{ doorStatus === 'open' ? '开启' : '关闭' }}
+          </div>
+        </div>
+        
+        <div class="door-control-buttons">
+          <button class="door-control-btn door-open-btn" 
+                 @click="controlDoor('open')" 
+                 :disabled="isLoading.doorControl || doorStatus === 'open'">
+            <i class="iconfont icon-unlock"></i> 开门
+          </button>
+          <button class="door-control-btn door-close-btn" 
+                 @click="controlDoor('close')" 
+                 :disabled="isLoading.doorControl || doorStatus === 'closed'">
+            <i class="iconfont icon-lock"></i> 关门
+          </button>
+        </div>
+        
+        <div class="door-operation-info" v-if="lastOperation">
+          上次操作: {{ lastOperation }}
+        </div>
+        
+        <div class="error-message" v-if="errorMessages.doorControl">
+          {{ errorMessages.doorControl }}
+        </div>
+      </div>
+      
+      <!-- 摄像头监控区域 -->
+      <div class="camera-section">
+        <div class="camera-header">
+          <span>摄像头监控</span>
+          <button class="camera-refresh-btn" @click="refreshCameraData">
+            <i class="iconfont icon-refresh"></i> 刷新
+          </button>
+        </div>
+        
+        <div class="error-message" v-if="errorMessages.cameraData">
+          {{ errorMessages.cameraData }}
+        </div>
+        
+        <div class="loading-indicator" v-if="isLoading.cameraData && !cameraData.length">
+          正在加载摄像头数据...
+        </div>
+        
+        <div class="camera-grid" v-else>
+          <div class="camera-card" v-for="camera in cameraData" :key="camera.id">
+            <div class="camera-feed">
+              <img v-if="camera.status === 'offline'" src="./assets/offline-camera.jpg" alt="摄像头离线">
+              <video v-else-if="camera.isPlaying" :ref="'camera-video-' + camera.id" controls autoplay></video>
+              <img v-else :src="camera.snapshotUrl" alt="摄像头实时图像">
+              
+              <div class="camera-status-badge" 
+                   :class="camera.status === 'online' ? 'camera-status-online' : 'camera-status-offline'">
+                {{ camera.status === 'online' ? '在线' : '离线' }}
+              </div>
+            </div>
+            
+            <div class="camera-info">
+              <div class="camera-location">{{ camera.location }}</div>
+              <div class="camera-time">{{ formatTime(camera.lastUpdate) }}</div>
+              
+              <div class="camera-controls">
+                <button class="camera-control-btn" 
+                       @click="playCamera(camera.id)" 
+                       v-if="camera.status === 'online' && !camera.isPlaying">
+                  <i class="iconfont icon-play"></i> 播放
+                </button>
+                <button class="camera-control-btn" 
+                       @click="stopCamera(camera.id)" 
+                       v-if="camera.isPlaying">
+                  <i class="iconfont icon-stop"></i> 停止
+                </button>
+                <button class="camera-control-btn" 
+                       @click="fullscreenCamera(camera.id)" 
+                       v-if="camera.isPlaying">
+                  <i class="iconfont icon-fullscreen"></i> 全屏
+                </button>
+                <button class="camera-control-btn" 
+                       @click="takeSnapshot(camera.id)" 
+                       v-if="camera.status === 'online'">
+                  <i class="iconfont icon-camera"></i> 抓拍
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 访问记录区域 -->
+      <div class="access-records-section">
+        <div class="records-header">
+          <span>访问记录</span>
+        </div>
+        
+        <div class="error-message" v-if="errorMessages.accessRecords">
+          {{ errorMessages.accessRecords }}
+        </div>
+        
+        <div class="loading-indicator" v-if="isLoading.accessRecords && !accessRecords.length">
+          正在加载访问记录...
+        </div>
+        
+        <div class="no-records" v-else-if="!accessRecords.length">
+          暂无访问记录
+        </div>
+        
+        <template v-else>
+          <table class="records-table">
+            <thead>
+              <tr>
+                <th>访问ID</th>
+                <th>用户</th>
+                <th>访问时间</th>
+                <th>门禁</th>
+                <th>访问结果</th>
+                <th>详情</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="record in accessRecords" :key="record.id">
+                <td>{{ record.id }}</td>
+                <td>{{ record.userName }}</td>
+                <td>{{ formatTime(record.timestamp) }}</td>
+                <td>{{ record.doorName }}</td>
+                <td>
+                  <span class="access-result" :class="getAccessResultClass(record.result)">
+                    {{ getAccessResultText(record.result) }}
+                  </span>
+                </td>
+                <td>{{ record.details }}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="pagination">
+            <button class="pagination-btn" 
+                   @click="changePage(currentPage - 1)" 
+                   :disabled="currentPage === 1">
+              上一页
+            </button>
+            
+            <span class="pagination-info">
+              第 {{ currentPage }} 页 / 共 {{ totalPages }} 页
+              ({{ recordTotalCount }} 条记录)
+            </span>
+            
+            <button class="pagination-btn" 
+                   @click="changePage(currentPage + 1)" 
+                   :disabled="currentPage >= totalPages">
+              下一页
+            </button>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="./doorMonitor.js"></script>
+</body>
+</html> 

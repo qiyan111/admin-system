@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小区物业后台管理系统 - 门禁监控</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js might not be needed here, but keep for consistency for now -->
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>LOGO</h1>
+            <p>小区物业后台管理</p>
+        </div>
+        <div class="menu">
+             <a href="dashboard.html" class="menu-item">
+                 <i>📄</i> 首页
+             </a>
+             <a href="monitoring.html" class="menu-item">
+                 <i>🚪</i> 门禁监控
+             </a>
+             <a href="owner-management.html" class="menu-item">
+                 <i>🏢</i> 业主管理
+             </a>
+             <a href="work-order.html" class="menu-item"> 
+                 <i>📝</i> 工单管理
+             </a>
+             <a href="visitor-management.html" class="menu-item">
+                 <i>👥</i> 访客管理
+             </a>
+             <a href="appointment-management.html" class="menu-item">
+                 <i>📅</i> 预约管理
+             </a>
+             <a href="parking-management.html" class="menu-item">
+                 <i>🅿️</i> 车位管理
+             </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Content from original #monitoring-view starts here -->
+         <div class="module">
+             <h2>门禁开关</h2>
+             <div class="door-buttons">
+                 <button class="door-close">关门</button>
+                 <button class="door-open">开门</button>
+            </div>
+        </div>
+
+        <div class="module">
+            <h2>监控</h2>
+            <div class="monitoring-grid">
+                <div class="camera-feed">
+                    <div class="camera-placeholder">
+                        <div class="play-icon">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                        </div>
+                        <svg class="fullscreen-icon" viewBox="0 0 24 24">
+                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                    </svg>
+                </div>
+                    <div class="camera-info-bar">
+                        <span>地点1</span>
+                        <span>YYYY - MM - DD HH:MM:SS</span>
+            </div>
+                </div>
+            <div class="camera-feed">
+                    <div class="camera-placeholder">
+                        <div class="play-icon">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                        </div>
+                        <svg class="fullscreen-icon" viewBox="0 0 24 24">
+                            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                        </svg>
+                    </div>
+                    <div class="camera-info-bar">
+                        <span>地点1</span>
+                        <span>YYYY - MM - DD HH:MM:SS</span>
+                </div>
+                </div>
+                 <div class="camera-feed">
+                    <div class="camera-placeholder">
+                        <div class="play-icon">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                        </div>
+                        <svg class="fullscreen-icon" viewBox="0 0 24 24">
+                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                    </svg>
+                    </div>
+                    <div class="camera-info-bar">
+                        <span>地点1</span>
+                        <span>YYYY - MM - DD HH:MM:SS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <!-- Content from original #monitoring-view ends here -->
+    </div>
+
+    <script src="script.js"></script> 
+</body>
+</html> 

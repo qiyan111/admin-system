@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小区物业后台管理系统 - 车位管理</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>LOGO</h1>
+            <p>小区物业后台管理</p>
+        </div>
+        <div class="menu">
+             <a href="dashboard.html" class="menu-item">
+                 <i>📄</i> 首页
+             </a>
+             <a href="monitoring.html" class="menu-item">
+                 <i>🚪</i> 门禁监控
+             </a>
+             <a href="owner-management.html" class="menu-item">
+                 <i>🏢</i> 业主管理
+             </a>
+             <a href="work-order.html" class="menu-item"> 
+                 <i>📝</i> 工单管理
+             </a>
+             <a href="visitor-management.html" class="menu-item">
+                 <i>👥</i> 访客管理
+             </a>
+             <a href="appointment-management.html" class="menu-item">
+                 <i>📅</i> 预约管理
+             </a>
+             <a href="parking-management.html" class="menu-item">
+                 <i>🅿️</i> 车位管理
+             </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="module">
+            <div class="parking-management-container" style="padding: 30px;">
+                <div class="parking-form" style="max-width: 500px;">
+                    <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center;">
+                        <label style="width: 80px; font-size: 16px;">总车位</label>
+                        <div class="input-with-unit" style="position: relative; display: flex; align-items: center; width: 140px;">
+                            <input type="text" id="totalParkingSpots" style="width: 100px; padding: 8px 35px 8px 10px; border-radius: 4px; border: 1px solid #ddd;" readonly>
+                            <span style="position: absolute; right: 10px; color: #666;">个</span>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center;">
+                        <label style="width: 80px; font-size: 16px;">剩余车位</label>
+                        <div class="input-with-unit" style="position: relative; display: flex; align-items: center; width: 140px;">
+                            <input type="text" id="availableParkingSpots" style="width: 100px; padding: 8px 35px 8px 10px; border-radius: 4px; border: 1px solid #ddd;" readonly>
+                            <span style="position: absolute; right: 10px; color: #666;">个</span>
+                        </div>
+                    </div>
+                    <div class="form-actions" style="margin-top: 30px;">
+                        <button id="cancelBtn" class="btn-cancel" style="background-color: #f8f9fa; border: 1px solid #ddd; padding: 8px 20px; border-radius: 4px; cursor: pointer; margin-right: 10px;">取消</button>
+                        <button id="submitBtn" class="btn-submit" style="background-color: #4c6ef5; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">确定修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operation Success Modal -->
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal" style="width: 350px;">
+            <div class="success-modal-content">
+                <img src="images/操作成功.png" alt="操作成功">
+                <p>操作成功</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const totalParkingSpotsInput = document.getElementById('totalParkingSpots');
+            const availableParkingSpotsInput = document.getElementById('availableParkingSpots');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const successModal = document.getElementById('success-modal');
+            
+            // 初始化加载车位数据
+            fetchParkingData();
+            
+            // 取消按钮点击事件
+            cancelBtn.addEventListener('click', function() {
+                // 重新加载页面以取消任何潜在的修改
+                window.location.reload();
+            });
+            
+            // 提交按钮点击事件
+            submitBtn.addEventListener('click', function() {
+                // 获取输入值
+                const totalSpots = totalParkingSpotsInput.value;
+                const availableSpots = availableParkingSpotsInput.value;
+                
+                // 验证输入
+                if (!totalSpots || isNaN(totalSpots) || !availableSpots || isNaN(availableSpots)) {
+                    alert('请输入有效的数字');
+                    return;
+                }
+                
+                if (Number(availableSpots) > Number(totalSpots)) {
+                    alert('剩余车位不能大于总车位');
+                    return;
+                }
+                
+                // 调用API更新车位数据
+                updateParkingData(totalSpots, availableSpots);
+            });
+            
+            // 获取车位数据
+            async function fetchParkingData() {
+                try {
+                    // 构建API请求参数
+                    const myHeaders = new Headers();
+                    myHeaders.append("communityId", "1");
+                    myHeaders.append("User-Agent", "Apifox/1.0.0 (https://apifox.com)");
+                    myHeaders.append("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxODQyMDQ3MTc2fQ.eR8U4B92t6xoRjzKocEThKpVV3q674vb_oekgwgOr1Q");
+                    myHeaders.append("Accept", "*/*");
+                    myHeaders.append("Host", "property-func-dcwdljroao.cn-shenzhen.fcapp.run");
+                    myHeaders.append("Connection", "keep-alive");
+                    
+                    const url = 'https://property-func-dcwdljroao.cn-shenzhen.fcapp.run/parking/get';
+                    console.log("请求URL:", url);
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: myHeaders,
+                        redirect: 'follow'
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`API Error (${response.status}): ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log("Parking data fetched:", data);
+                    
+                    // 处理API返回数据
+                    if (data && data.data) {
+                        const parkingData = data.data;
+                        // 更新UI显示 - 修正字段名称与后端返回一致
+                        totalParkingSpotsInput.value = parkingData.spaceNum || 'X';
+                        availableParkingSpotsInput.value = parkingData.freeNum || 'X';
+                        
+                        // 移除readonly属性以允许编辑
+                        totalParkingSpotsInput.removeAttribute('readonly');
+                        availableParkingSpotsInput.removeAttribute('readonly');
+                    } else {
+                        console.warn("API返回数据格式不正确或无数据");
+                        // 使用默认值
+                        totalParkingSpotsInput.value = 'X';
+                        availableParkingSpotsInput.value = 'X';
+                    }
+                } catch (error) {
+                    console.error("Error fetching parking data:", error);
+                    // 使用默认值
+                    totalParkingSpotsInput.value = 'X';
+                    availableParkingSpotsInput.value = 'X';
+                }
+            }
+            
+            // 更新车位数据
+            async function updateParkingData(totalSpots, availableSpots) {
+                try {
+                    // 构建API请求参数
+                    const myHeaders = new Headers();
+                    myHeaders.append("communityId", "1");
+                    myHeaders.append("User-Agent", "Apifox/1.0.0 (https://apifox.com)");
+                    myHeaders.append("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxODQyMDQ3MTc2fQ.eR8U4B92t6xoRjzKocEThKpVV3q674vb_oekgwgOr1Q");
+                    myHeaders.append("Accept", "*/*");
+                    myHeaders.append("Content-Type", "application/json");
+                    myHeaders.append("Host", "property-func-dcwdljroao.cn-shenzhen.fcapp.run");
+                    myHeaders.append("Connection", "keep-alive");
+                    
+                    // 构建请求体
+                    const requestBody = JSON.stringify({
+                        spaceNum: Number(totalSpots),
+                        freeNum: Number(availableSpots)
+                    });
+                    
+                    // 这里应该使用实际的更新API
+                    // 目前演示使用与GET相同的URL，实际应调用更新API
+                    const url = 'https://property-func-dcwdljroao.cn-shenzhen.fcapp.run/parking/get';
+                    console.log("更新请求URL:", url);
+                    console.log("更新请求体:", requestBody);
+                    
+                    // 由于这是演示，我们仅显示成功弹窗而不实际发送请求
+                    // 实际环境中应替换为下方注释的代码
+                    /* 
+                    const response = await fetch(url, {
+                        method: 'POST', // 或 'PUT'，取决于API设计
+                        headers: myHeaders,
+                        body: requestBody,
+                        redirect: 'follow'
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`API Error (${response.status}): ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log("Parking data updated:", data);
+                    */
+                    
+                    // 显示成功弹窗
+                    showSuccessModal();
+                    
+                    // 2秒后刷新数据
+                    setTimeout(() => {
+                        fetchParkingData();
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error("Error updating parking data:", error);
+                    alert('更新车位数据失败: ' + error.message);
+                }
+            }
+            
+            // 显示成功弹窗
+            function showSuccessModal() {
+                if (successModal) {
+                    successModal.classList.add('active');
+                    setTimeout(() => {
+                        successModal.classList.remove('active');
+                    }, 2000);
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

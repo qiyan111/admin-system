@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小区物业后台管理系统 - 业主管理</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Might not be needed, keep for now -->
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>LOGO</h1>
+            <p>小区物业后台管理</p>
+        </div>
+        <div class="menu">
+             <a href="dashboard.html" class="menu-item">
+                 <i>📄</i> 首页
+             </a>
+             <a href="monitoring.html" class="menu-item">
+                 <i>🚪</i> 门禁监控
+             </a>
+             <a href="owner-management.html" class="menu-item">
+                 <i>🏢</i> 业主管理
+             </a>
+             <a href="work-order.html" class="menu-item"> 
+                 <i>📝</i> 工单管理
+             </a>
+             <a href="visitor-management.html" class="menu-item">
+                 <i>👥</i> 访客管理
+             </a>
+             <a href="appointment-management.html" class="menu-item">
+                 <i>📅</i> 预约管理
+             </a>
+             <a href="parking-management.html" class="menu-item">
+                 <i>🅿️</i> 车位管理
+             </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Content from original #owner-management-view starts here -->
+        <div class="module" style="position: relative;">
+            <div class="table-loading-overlay" id="owner-table-loading">
+                加载中...
+                        </div>
+            <div class="filter-bar">
+                <select name="status">
+                    <option value="">审批状态</option>
+                    <option value="pending">待审核</option>
+                    <option value="approved">通过</option>
+                    <option value="rejected">不通过</option>
+                </select>
+                <select name="building">
+                    <option value="">楼栋</option>
+                    <option value="A">A栋</option>
+                    <option value="B">B栋</option>
+                </select>
+                <select name="unit">
+                    <option value="">单元</option>
+                    <option value="1">1单元</option>
+                    <option value="2">2单元</option>
+                </select>
+                <select name="floor">
+                    <option value="">楼层</option>
+                    <option value="1">1楼</option>
+                    <option value="10">10楼</option>
+                </select>
+                <input type="date" name="date">
+                <input type="text" name="search" placeholder="模糊查询">
+                <button class="search-button">查询</button>
+                        </div>
+
+            <div class="action-buttons">
+                <button class="primary-action">导入数据</button>
+                <button class="primary-action">导出数据</button>
+                <button class="secondary-action" style="margin-left: auto;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path></svg>
+                    刷新表格
+                </button>
+                    </div>
+
+            <table class="owner-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>状态</th>
+                        <th>姓名</th>
+                        <th>联系方式</th>
+                        <th>楼栋</th>
+                        <th>单元</th>
+                        <th>楼层</th>
+                        <th>门牌号</th>
+                        <th>创建时间</th>
+                        <th>审核时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Placeholder Rows with data-id and class -->
+                    <tr data-id="1">
+                        <td><input type="checkbox" class="owner-checkbox"></td>
+                        <td><span class="status-badge status-pending">待审核</span></td>
+                        <td>业主姓名A</td>
+                        <td>移动电话A</td>
+                        <td>X栋</td>
+                        <td>X单元</td>
+                        <td>XX楼层</td>
+                        <td>XXXX</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                    </tr>
+                    <tr data-id="2">
+                        <td><input type="checkbox" class="owner-checkbox"></td>
+                        <td><span class="status-badge status-approved">通过</span></td>
+                        <td>业主姓名B</td>
+                        <td>移动电话B</td>
+                        <td>X栋</td>
+                        <td>X单元</td>
+                        <td>XX楼层</td>
+                        <td>XXXX</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                    </tr>
+                     <tr data-id="3">
+                        <td><input type="checkbox" class="owner-checkbox"></td>
+                        <td><span class="status-badge status-rejected">不通过</span></td>
+                        <td>业主姓名C</td>
+                        <td>移动电话C</td>
+                        <td>X栋</td>
+                        <td>X单元</td>
+                        <td>XX楼层</td>
+                        <td>XXXX</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                    </tr>
+                    <tr data-id="4">
+                        <td><input type="checkbox" class="owner-checkbox"></td>
+                        <td><span class="status-badge status-pending">待审核</span></td>
+                        <td>业主姓名D</td>
+                        <td>移动电话D</td>
+                        <td>X栋</td>
+                        <td>X单元</td>
+                        <td>XX楼层</td>
+                        <td>XXXX</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                    </tr>
+                     <tr data-id="5">
+                        <td><input type="checkbox" class="owner-checkbox"></td>
+                        <td><span class="status-badge status-approved">通过</span></td>
+                        <td>业主姓名E</td>
+                        <td>移动电话E</td>
+                        <td>X栋</td>
+                        <td>X单元</td>
+                        <td>XX楼层</td>
+                        <td>XXXX</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                    </tr>
+                     <tr data-id="6">
+                        <td><input type="checkbox" class="owner-checkbox"></td>
+                        <td><span class="status-badge status-rejected">不通过</span></td>
+                        <td>业主姓名F</td>
+                        <td>移动电话F</td>
+                        <td>X栋</td>
+                        <td>X单元</td>
+                        <td>XX楼层</td>
+                        <td>XXXX</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                    </tr>
+                     <tr data-id="7">
+                        <td><input type="checkbox" class="owner-checkbox"></td>
+                        <td><span class="status-badge status-pending">待审核</span></td>
+                        <td>业主姓名G</td>
+                        <td>移动电话G</td>
+                        <td>X栋</td>
+                        <td>X单元</td>
+                        <td>XX楼层</td>
+                        <td>XXXX</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                    </tr>
+                    <tr data-id="8">
+                        <td><input type="checkbox" class="owner-checkbox"></td>
+                        <td><span class="status-badge status-approved">通过</span></td>
+                        <td>业主姓名H</td>
+                        <td>移动电话H</td>
+                        <td>X栋</td>
+                        <td>X单元</td>
+                        <td>XX楼层</td>
+                        <td>XXXX</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                        <td>YYYY - MM - DD HH:MM</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="table-footer">
+                <div class="footer-actions">
+                    <button class="approve-button" id="batch-approve-button">审核</button>
+                    <button class="delete-button">删除</button>
+                </div>
+                <div class="pagination">
+                    <span>本页共8条/共XXX条</span>
+                    <a href="#">&lt;</a>
+                    <a href="#" class="current">1</a>
+                    <a href="#">2</a>
+                    <a href="#">3</a>
+                    <a href="#">4</a>
+                    <span class="dots">...</span>
+                    <a href="#">&gt;</a>
+                    <span>跳转至</span>
+                    <input type="number" min="1" value="1">
+                    <span>页</span>
+                    <button>跳转</button>
+                        </div>
+                        </div>
+                        </div>
+        <!-- Content from original #owner-management-view ends here -->
+    </div>
+
+    <!-- Batch Review Modal -->
+    <div id="batch-review-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>批量审核</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>审核对象</label>
+                    <span id="selected-count" class="value">X 个</span>
+                </div>
+                <div class="form-group">
+                    <label>审核状态</label>
+                    <div class="status-buttons">
+                        <button data-status="同意" class="selected">通过</button> 
+                        <button data-status="拒绝">不通过</button> 
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-button" id="cancel-review-button">取消</button>
+                <button class="confirm-button" id="confirm-review-button">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operation Success Modal -->
+    <div id="success-modal" class="modal-overlay">
+         <div class="modal" style="width: 350px;">
+             <div class="success-modal-content">
+                 <!-- Replace with actual success image path -->
+                 <img src="images/操作成功.png" alt="操作成功">
+                 <p>操作成功</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script> 
+</body>
+</html> 

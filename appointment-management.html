@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小区物业后台管理系统 - 预约管理</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>LOGO</h1>
+            <p>小区物业后台管理</p>
+        </div>
+        <div class="menu">
+             <a href="dashboard.html" class="menu-item">
+                 <i>📄</i> 首页
+             </a>
+             <a href="monitoring.html" class="menu-item">
+                 <i>🚪</i> 门禁监控
+             </a>
+             <a href="owner-management.html" class="menu-item">
+                 <i>🏢</i> 业主管理
+             </a>
+             <a href="work-order.html" class="menu-item"> 
+                 <i>📝</i> 工单管理
+             </a>
+             <a href="visitor-management.html" class="menu-item">
+                 <i>👥</i> 访客管理
+             </a>
+             <a href="appointment-management.html" class="menu-item">
+                 <i>📅</i> 预约管理
+             </a>
+             <a href="placeholder.html" class="menu-item">
+                 <i>🅿️</i> 车位管理
+             </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="module" style="position: relative;">
+            <div class="table-loading-overlay" id="appointment-table-loading">
+                加载中...
+            </div>
+            
+            <div class="filter-bar" style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
+                <div class="date-selector" style="display: flex; align-items: center;">
+                    <label style="margin-right: 5px;">日期</label>
+                    <input type="date" name="appointmentDate" id="appointmentDate" style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ddd;">
+                </div>
+                <button class="search-button" style="background-color: #4c6ef5; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">查询</button>
+                <button class="reset-button" style="background-color: #f8f9fa; color: #333; border: 1px solid #ddd; padding: 8px 16px; border-radius: 4px; cursor: pointer;">清空</button>
+            </div>
+
+            <div class="action-buttons" style="margin-bottom: 15px;">
+                <button class="primary-action" id="import-appointment-button" style="background-color: #4c6ef5; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 10px;">导入数据</button>
+                <button class="primary-action" id="export-appointment-button" style="background-color: #4c6ef5; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">导出数据</button>
+                <button class="secondary-action" id="refresh-appointment-table" style="background-color: #f8f9fa; color: #333; border: 1px solid #ddd; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-left: auto; display: flex; align-items: center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 5px;"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path></svg>
+                    刷新表格
+                </button>
+            </div>
+
+            <table class="appointment-table" style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th style="padding: 12px; text-align: center; border-bottom: 1px solid #eee; font-weight: normal;"><input type="checkbox"></th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-weight: normal;">业主姓名</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-weight: normal;">业主电话</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-weight: normal;">预约时间</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-weight: normal;">预约场所</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-weight: normal;">创建时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Appointment rows will be populated here -->
+                    <tr><td colspan="6" style="text-align: center; padding: 20px;">加载中...</td></tr>
+                </tbody>
+            </table>
+
+            <div class="table-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="footer-actions">
+                    <button class="primary-action" id="appointment-remind-button" style="background-color: #4c6ef5; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 10px;">提醒</button>
+                    <button class="delete-button" id="appointment-delete-button" style="background-color: #ff6b6b; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">删除</button>
+                </div>
+                <div class="pagination" style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #666;">本页共X条/共XXX条</span>
+                    <a href="#" style="text-decoration: none; color: #333; padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px;">&lt;</a>
+                    <!-- Page numbers will be added here -->
+                    <a href="#" style="text-decoration: none; color: #333; padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px;">&gt;</a>
+                    <span style="color: #666;">跳转至</span>
+                    <input type="number" min="1" value="1" style="width: 40px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                    <span style="color: #666;">页</span>
+                    <button style="background-color: #f8f9fa; color: #333; border: 1px solid #ddd; padding: 5px 10px; border-radius: 4px; cursor: pointer;">跳转</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operation Success Modal -->
+    <div id="success-modal" class="modal-overlay">
+         <div class="modal" style="width: 350px;">
+             <div class="success-modal-content">
+                 <img src="images/操作成功.png" alt="操作成功">
+                 <p>操作成功</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 变量初始化
+            let allAppointmentData = [];
+            let currentPage = 1;
+            let totalPages = 1;
+            let totalRecords = 0;
+            let pageSize = 10; 
+            let currentFilters = {
+                date: ''
+            };
+            
+            // 可预约房间列表
+            let availableRooms = [];
+            
+            // 获取DOM元素
+            const appointmentDateInput = document.getElementById('appointmentDate');
+            const searchButton = document.querySelector('.search-button');
+            const resetButton = document.querySelector('.reset-button');
+            const refreshButton = document.getElementById('refresh-appointment-table');
+            const appointmentTableBody = document.querySelector('.appointment-table tbody');
+            const loadingOverlay = document.getElementById('appointment-table-loading');
+            
+            // 初始化
+            fetchAppointmentData();
+            fetchAvailableRooms(); // 新增获取可预约房间列表
+            
+            // 查询按钮点击事件
+            searchButton.addEventListener('click', function() {
+                currentFilters.date = appointmentDateInput.value;
+                currentPage = 1; // 重置到第一页
+                fetchAppointmentData();
+            });
+            
+            // 重置按钮点击事件
+            resetButton.addEventListener('click', function() {
+                appointmentDateInput.value = '';
+                currentFilters = {
+                    date: ''
+                };
+                currentPage = 1; // 重置到第一页
+                fetchAppointmentData();
+            });
+            
+            // 刷新按钮点击事件
+            refreshButton.addEventListener('click', fetchAppointmentData);
+            
+            // 获取可预约房间列表
+            async function fetchAvailableRooms() {
+                // 构建API请求参数
+                const myHeaders = new Headers();
+                myHeaders.append("communityId", "1");
+                myHeaders.append("User-Agent", "Apifox/1.0.0 (https://apifox.com)");
+                myHeaders.append("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxODQyMDQ3MTc2fQ.eR8U4B92t6xoRjzKocEThKpVV3q674vb_oekgwgOr1Q");
+                myHeaders.append("Accept", "*/*");
+                myHeaders.append("Host", "property-func-dcwdljroao.cn-shenzhen.fcapp.run");
+                myHeaders.append("Connection", "keep-alive");
+                
+                const url = 'https://property-func-dcwdljroao.cn-shenzhen.fcapp.run/appointment/getAllRoom';
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: myHeaders,
+                        redirect: 'follow'
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`API Error (${response.status}): ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log("Available rooms fetched:", data);
+                    
+                    // 处理API返回数据 - 根据实际API返回格式修正
+                    if (data && data.code === "200" && Array.isArray(data.data)) {
+                        availableRooms = data.data;
+                        console.log("可预约房间列表:", availableRooms);
+                    } else {
+                        console.warn("房间数据API返回格式不正确或无数据");
+                        availableRooms = [];
+                    }
+                } catch (error) {
+                    console.error("Error fetching available rooms:", error);
+                    availableRooms = [];
+                }
+            }
+            
+            // 获取预约数据
+            async function fetchAppointmentData() {
+                if (loadingOverlay) loadingOverlay.classList.add('active');
+                
+                // 构建API请求参数
+                const myHeaders = new Headers();
+                myHeaders.append("communityId", "1");
+                myHeaders.append("User-Agent", "Apifox/1.0.0 (https://apifox.com)");
+                myHeaders.append("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxODQyMDQ3MTc2fQ.eR8U4B92t6xoRjzKocEThKpVV3q674vb_oekgwgOr1Q");
+                myHeaders.append("Accept", "*/*");
+                myHeaders.append("Host", "property-func-dcwdljroao.cn-shenzhen.fcapp.run");
+                myHeaders.append("Connection", "keep-alive");
+                
+                // 构建查询参数
+                let queryParams = new URLSearchParams();
+                queryParams.append('pageNum', currentPage);
+                queryParams.append('size', pageSize);
+                
+                // 如果有日期筛选，添加日期参数
+                if (currentFilters.date) {
+                    const selectedDate = new Date(currentFilters.date);
+                    // 这里可以添加日期相关参数，如果API支持的话
+                    // 例如：queryParams.append('date', selectedDate.toISOString());
+                }
+                
+                const url = `https://property-func-dcwdljroao.cn-shenzhen.fcapp.run/appointment/getNotChecked?${queryParams.toString()}`;
+                console.log("请求URL:", url);
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: myHeaders,
+                        redirect: 'follow'
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`API Error (${response.status}): ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log("Appointment data fetched:", data);
+                    
+                    // 处理API返回数据
+                    if (data && data.code === "200" && data.msg === "success") {
+                        if (data.data && Array.isArray(data.data.list)) {
+                            allAppointmentData = data.data.list;
+                            
+                            // 获取总记录数
+                            totalRecords = allAppointmentData.length;
+                            if (data.data.total && data.data.total > 0) {
+                                totalRecords = data.data.total;
+                            }
+                        } else {
+                            // API成功但没有数据或数据格式不符合预期
+                            console.log("API返回成功，但没有数据或格式不符合预期");
+                            allAppointmentData = [];
+                            totalRecords = 0;
+                        }
+                        
+                        // 计算总页数
+                        totalPages = Math.ceil(totalRecords / pageSize);
+                        if (totalPages < 1) totalPages = 1;
+                        
+                        console.log(`处理后的数据: ${allAppointmentData.length}条记录, 共${totalPages}页`);
+                    } else {
+                        // 如果API返回错误
+                        console.warn("API返回错误:", data.msg || "未知错误");
+                        allAppointmentData = [];
+                        totalRecords = 0;
+                        totalPages = 1;
+                        // 生成模拟数据以匹配UI设计
+                        generateMockData();
+                    }
+                    
+                    // 更新表格
+                    updateAppointmentTable();
+                    // 更新分页UI
+                    updatePaginationUI();
+                } catch (error) {
+                    console.error("Error fetching appointment data:", error);
+                    // 在API请求失败时使用模拟数据
+                    generateMockData();
+                    updateAppointmentTable();
+                    updatePaginationUI();
+                } finally {
+                    if (loadingOverlay) loadingOverlay.classList.remove('active');
+                }
+            }
+            
+            // 生成模拟数据以匹配UI设计
+            function generateMockData() {
+                allAppointmentData = Array(10).fill().map((_, idx) => ({
+                    ownerName: 'XXX',
+                    phone: 'XXXXXXXX',
+                    appointmentTime: 'YYYY-MM-DD HH:MM',
+                    location: 'XXXX',
+                    createTime: 'YYYY-MM-DD HH:MM'
+                }));
+                
+                totalRecords = allAppointmentData.length;
+                totalPages = Math.ceil(totalRecords / pageSize);
+            }
+            
+            // 更新预约表格
+            function updateAppointmentTable() {
+                if (!appointmentTableBody) return;
+                
+                appointmentTableBody.innerHTML = '';
+                
+                if (allAppointmentData.length === 0) {
+                    appointmentTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">暂无数据</td></tr>';
+                    return;
+                }
+                
+                console.log(`更新表格: 显示${allAppointmentData.length}条记录`);
+                
+                // 直接使用API返回的当前页数据
+                allAppointmentData.forEach(appointment => {
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid #eee';
+                    
+                    // 获取预约信息
+                    const ownerName = appointment.ownerName || appointment.name || 'XXX';
+                    const phone = appointment.phone || 'XXXXXXXX';
+                    const appointmentTime = appointment.appointmentTime || 'YYYY-MM-DD HH:MM';
+                    const location = appointment.location || appointment.place || 'XXXX';
+                    const createTime = appointment.createTime || 'YYYY-MM-DD HH:MM';
+                    
+                    row.innerHTML = `
+                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="appointment-checkbox"></td>
+                        <td style="padding: 12px;">${ownerName}</td>
+                        <td style="padding: 12px;">${phone}</td>
+                        <td style="padding: 12px;">${appointmentTime}</td>
+                        <td style="padding: 12px;">${location}</td>
+                        <td style="padding: 12px;">${createTime}</td>
+                    `;
+                    
+                    appointmentTableBody.appendChild(row);
+                });
+            }
+            
+            // 更新分页UI
+            function updatePaginationUI() {
+                const pagination = document.querySelector('.pagination');
+                if (!pagination) return;
+                
+                const totalInfoSpan = pagination.querySelector('span:first-child');
+                if (totalInfoSpan) {
+                    const currentPageRecords = allAppointmentData.length;
+                    totalInfoSpan.textContent = `本页共${currentPageRecords}条/共${totalRecords}条`;
+                }
+                
+                // 清除现有页码链接
+                const dynamicElements = pagination.querySelectorAll('a:not(:first-child):not(:last-of-type), span.dots-generated');
+                dynamicElements.forEach(el => el.remove());
+                
+                const nextPageLink = pagination.querySelector('a:last-of-type');
+                
+                const maxPageButtons = 5;
+                let startPage, endPage;
+                
+                if (totalPages <= maxPageButtons + 2) {
+                    startPage = 1;
+                    endPage = totalPages;
+                } else {
+                    if (currentPage <= maxPageButtons - 1) {
+                        startPage = 1;
+                        endPage = maxPageButtons;
+                    } else if (currentPage >= totalPages - maxPageButtons + 2) {
+                        startPage = totalPages - maxPageButtons + 1;
+                        endPage = totalPages;
+                    } else {
+                        startPage = currentPage - Math.floor((maxPageButtons - 2) / 2);
+                        endPage = currentPage + Math.ceil((maxPageButtons - 2) / 2);
+                    }
+                }
+                
+                // 创建页码链接函数
+                const createPageLink = (page) => {
+                    const pageLink = document.createElement('a');
+                    pageLink.href = '#';
+                    pageLink.textContent = page;
+                    pageLink.style.textDecoration = 'none';
+                    pageLink.style.color = page === currentPage ? '#fff' : '#333';
+                    pageLink.style.backgroundColor = page === currentPage ? '#4c6ef5' : '#fff';
+                    pageLink.style.padding = '5px 10px';
+                    pageLink.style.border = '1px solid #ddd';
+                    pageLink.style.borderRadius = '4px';
+                    
+                    pageLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (page !== currentPage) {
+                            currentPage = page;
+                            fetchAppointmentData();
+                        }
+                    });
+                    return pageLink;
+                };
+                
+                // 创建省略号
+                const createDots = () => {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.style.color = '#666';
+                    dots.classList.add('dots-generated');
+                    return dots;
+                };
+                
+                const insertBeforeTarget = nextPageLink;
+                
+                // 添加页码链接
+                if (startPage > 1) {
+                    pagination.insertBefore(createPageLink(1), insertBeforeTarget);
+                    if (startPage > 2) {
+                        pagination.insertBefore(createDots(), insertBeforeTarget);
+                    }
+                }
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    pagination.insertBefore(createPageLink(i), insertBeforeTarget);
+                }
+                
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        pagination.insertBefore(createDots(), insertBeforeTarget);
+                    }
+                    pagination.insertBefore(createPageLink(totalPages), insertBeforeTarget);
+                }
+                
+                // 更新上一页下一页按钮状态
+                const prevPageLink = pagination.querySelector('a:first-child');
+                if (prevPageLink) {
+                    prevPageLink.style.opacity = currentPage === 1 ? '0.5' : '1';
+                    prevPageLink.style.cursor = currentPage === 1 ? 'default' : 'pointer';
+                    
+                    // 添加上一页点击事件
+                    if (!prevPageLink.dataset.listenerAttached) {
+                        prevPageLink.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            if (currentPage > 1) {
+                                currentPage--;
+                                fetchAppointmentData();
+                            }
+                        });
+                        prevPageLink.dataset.listenerAttached = 'true';
+                    }
+                }
+                
+                if (nextPageLink) {
+                    nextPageLink.style.opacity = currentPage === totalPages ? '0.5' : '1';
+                    nextPageLink.style.cursor = currentPage === totalPages ? 'default' : 'pointer';
+                    
+                    // 添加下一页点击事件
+                    if (!nextPageLink.dataset.listenerAttached) {
+                        nextPageLink.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            if (currentPage < totalPages) {
+                                currentPage++;
+                                fetchAppointmentData();
+                            }
+                        });
+                        nextPageLink.dataset.listenerAttached = 'true';
+                    }
+                }
+                
+                // 跳转页码输入框和按钮
+                const pageInput = pagination.querySelector('input[type="number"]');
+                const jumpButton = pagination.querySelector('button');
+                
+                if (pageInput && jumpButton && !jumpButton.dataset.listenerAttached) {
+                    pageInput.value = currentPage;
+                    pageInput.max = totalPages > 0 ? totalPages : 1;
+                    pageInput.min = 1;
+                    
+                    jumpButton.addEventListener('click', () => {
+                        const pageNum = parseInt(pageInput.value);
+                        if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
+                            currentPage = pageNum;
+                            fetchAppointmentData();
+                        } else {
+                            alert(`请输入1-${totalPages}之间的有效页码`);
+                            pageInput.value = currentPage;
+                        }
+                    });
+                    
+                    jumpButton.dataset.listenerAttached = 'true';
+                }
+            }
+            
+            // 导出数据按钮事件
+            const exportButton = document.getElementById('export-appointment-button');
+            if (exportButton) {
+                exportButton.addEventListener('click', function() {
+                    alert('导出功能待实现');
+                });
+            }
+            
+            // 导入数据按钮事件
+            const importButton = document.getElementById('import-appointment-button');
+            if (importButton) {
+                importButton.addEventListener('click', function() {
+                    alert('导入功能待实现');
+                });
+            }
+            
+            // 删除按钮事件
+            const deleteButton = document.getElementById('appointment-delete-button');
+            if (deleteButton) {
+                deleteButton.addEventListener('click', function() {
+                    alert('删除功能待实现');
+                });
+            }
+            
+            // 提醒按钮事件
+            const remindButton = document.getElementById('appointment-remind-button');
+            if (remindButton) {
+                remindButton.addEventListener('click', function() {
+                    alert('提醒功能待实现');
+                });
+            }
+            
+            // 启用全选/取消全选功能
+            const headerCheckbox = document.querySelector('.appointment-table thead input[type="checkbox"]');
+            if (headerCheckbox) {
+                headerCheckbox.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    document.querySelectorAll('.appointment-table tbody input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.checked = isChecked;
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html> 
